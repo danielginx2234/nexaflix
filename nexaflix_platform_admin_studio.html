@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100 antialiased selection:bg-cyan-500 selection:text-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaFlix | Next-Gen Liquid Streaming Platform</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif']
+                    },
+                    colors: {
+                        nexa: {
+                            cyan: '#00f2fe',
+                            violet: '#4facfe',
+                            purple: '#7f00ff',
+                            magenta: '#e100ff',
+                            pink: '#ff007f',
+                            dark: '#050711',
+                            card: 'rgba(15, 23, 42, 0.65)'
+                        }
+                    },
+                    animation: {
+                        'liquid-slow': 'liquidBlob 16s infinite ease-in-out',
+                        'liquid-fast': 'liquidBlob 9s infinite ease-in-out',
+                        'pulse-glow': 'pulseGlow 3s infinite ease-in-out',
+                        'float': 'float 6s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        liquidBlob: {
+                            '0%, 100%': { transform: 'translate(0px, 0px) scale(1) rotate(0deg)' },
+                            '33%': { transform: 'translate(50px, -70px) scale(1.2) rotate(120deg)' },
+                            '66%': { transform: 'translate(-40px, 40px) scale(0.85) rotate(240deg)' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.35', filter: 'blur(40px)' },
+                            '50%': { opacity: '0.75', filter: 'blur(60px)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Glassmorphism Liquid Styling */
+        .glass-panel {
+            background: rgba(10, 15, 30, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            border-color: rgba(0, 242, 254, 0.5);
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.25);
+            transform: translateY(-5px);
+        }
+        .text-glow {
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
+        }
+        .text-glow-magenta {
+            text-shadow: 0 0 20px rgba(225, 0, 255, 0.6);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050711;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 9999px;
+            border: 2px solid #050711;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f2fe;
+        }
+    </style>
+</head>
+<body class="h-full font-sans bg-[#050711] overflow-x-hidden text-slate-100">
+
+    <!-- Ambient Dynamic Liquid Blobs Background -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-nexa-cyan/20 rounded-full blur-3xl animate-liquid-slow"></div>
+        <div class="absolute top-1/3 -right-40 w-[600px] h-[600px] bg-nexa-purple/20 rounded-full blur-3xl animate-liquid-slow" style="animation-delay: -5s;"></div>
+        <div class="absolute -bottom-40 left-1/3 w-[650px] h-[650px] bg-nexa-magenta/15 rounded-full blur-3xl animate-liquid-fast" style="animation-delay: -9s;"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(5,7,17,0.85)_100%)]"></div>
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app" class="relative z-10 flex flex-col min-h-screen">
+        
+        <!-- HEADER / NAVIGATION -->
+        <header class="sticky top-0 z-40 glass-panel border-b border-slate-800/80 px-4 lg:px-8 py-3.5 transition-all">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                
+                <!-- Logo -->
+                <a href="#" onclick="switchView('user')" class="flex items-center gap-3 group">
+                    <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-nexa-cyan via-nexa-purple to-nexa-magenta p-[1px] shadow-lg shadow-nexa-cyan/20 group-hover:shadow-nexa-cyan/50 transition">
+                        <div class="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
+                            <span class="font-display font-black text-xl bg-gradient-to-r from-nexa-cyan to-nexa-magenta bg-clip-text text-transparent">N</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-display font-extrabold text-xl tracking-wider bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">NEXA<span class="text-nexa-cyan">FLIX</span></span>
+                        <span class="text-[9px] text-nexa-cyan/80 tracking-widest font-mono uppercase -mt-1">Fluid Cinema</span>
+                    </div>
+                </a>
+
+                <!-- View Navigation Switcher -->
+                <div class="hidden md:flex items-center p-1 rounded-full bg-slate-900/90 border border-slate-800 text-xs font-semibold">
+                    <button id="nav-user-btn" onclick="switchView('user')" class="px-5 py-2 rounded-full transition-all text-slate-950 bg-nexa-cyan shadow-md shadow-nexa-cyan/30 flex items-center gap-2">
+                        <i data-lucide="tv" class="w-4 h-4"></i> Streaming Platform
+                    </button>
+                    <button id="nav-admin-btn" onclick="switchView('admin')" class="px-5 py-2 rounded-full transition-all text-slate-400 hover:text-white flex items-center gap-2">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Studio Admin
+                        <span id="badge-count" class="ml-1 px-2 py-0.5 text-[10px] bg-nexa-purple/60 text-white rounded-full">0</span>
+                    </button>
+                </div>
+
+                <!-- Auth / User Section -->
+                <div class="flex items-center gap-3">
+                    <div id="auth-status-container">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-slate-400 hover:text-white glass-card rounded-xl">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div id="mobile-menu" class="hidden md:hidden pt-3 pb-2 border-t border-slate-800/80 mt-3 flex justify-around">
+                <button onclick="switchView('user'); toggleMobileMenu()" class="text-xs font-semibold py-2 px-4 rounded-xl bg-nexa-cyan text-slate-950 flex items-center gap-2">
+                    <i data-lucide="tv" class="w-4 h-4"></i> Streaming Platform
+                </button>
+                <button onclick="switchView('admin'); toggleMobileMenu()" class="text-xs font-semibold py-2 px-4 rounded-xl bg-slate-800 text-slate-300 flex items-center gap-2">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Studio Admin
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN STREAMING PLATFORM (USER VIEW) -->
+        <main id="user-view" class="flex-grow flex flex-col justify-center max-w-7xl w-full mx-auto px-4 lg:px-8 py-8">
+            
+            <!-- EMPTY CATALOG STATE -->
+            <div id="empty-catalog-state" class="flex flex-col items-center justify-center text-center py-12 md:py-20 relative">
+                
+                <!-- Glowing Liquid Core Visual -->
+                <div class="relative mb-8 group">
+                    <div class="w-40 h-40 md:w-52 md:h-52 rounded-full bg-gradient-to-tr from-nexa-cyan/30 via-nexa-purple/40 to-nexa-magenta/30 blur-2xl animate-pulse-glow absolute inset-0"></div>
+                    <div class="relative w-40 h-40 md:w-52 md:h-52 rounded-3xl glass-card flex items-center justify-center border border-white/20 shadow-2xl animate-float">
+                        <div class="w-24 h-24 rounded-2xl bg-slate-950/90 border border-nexa-cyan/40 flex items-center justify-center text-nexa-cyan shadow-inner">
+                            <i data-lucide="film" class="w-12 h-12 stroke-[1.5] animate-pulse"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Announcement Banner -->
+                <div class="max-w-2xl space-y-4">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/80 border border-nexa-cyan/40 text-nexa-cyan text-xs font-bold tracking-wide uppercase">
+                        <span class="w-2.5 h-2.5 rounded-full bg-nexa-cyan animate-ping"></span>
+                        Fluid Streaming Core Status: Standby
+                    </div>
+                    
+                    <h1 class="text-3xl md:text-5xl font-display font-extrabold text-white tracking-tight leading-tight">
+                        No New Shows Yet — <br>
+                        <span class="bg-gradient-to-r from-nexa-cyan via-nexa-violet to-nexa-magenta bg-clip-text text-transparent text-glow">
+                            Stay Tuned for Upcoming Premieres!
+                        </span>
+                    </h1>
+
+                    <p class="text-slate-400 text-sm md:text-base leading-relaxed max-w-lg mx-auto">
+                        NexaFlix is initializing its high-definition liquid catalog. Create an account or log in to get early access notifications when the studio launches new releases.
+                    </p>
+                </div>
+
+                <!-- Call to Actions -->
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <button onclick="openAuthModal('signup')" class="px-7 py-3.5 rounded-xl bg-gradient-to-r from-nexa-cyan via-indigo-600 to-nexa-purple font-bold text-slate-950 hover:text-white shadow-xl shadow-nexa-cyan/25 hover:shadow-nexa-cyan/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i> Join NexaFlix Platform
+                    </button>
+                    
+                    <button onclick="switchView('admin')" class="px-7 py-3.5 rounded-xl glass-card text-white hover:bg-slate-800/80 border border-slate-700 flex items-center gap-2 hover:border-nexa-cyan/60 transition">
+                        <i data-lucide="shield-alert" class="w-5 h-5 text-nexa-cyan"></i> Launch Studio Admin Portal
+                    </button>
+                </div>
+
+                <!-- Skeleton Teasers -->
+                <div class="mt-16 w-full text-left">
+                    <div class="flex items-center justify-between mb-6 border-b border-slate-800/80 pb-3">
+                        <h3 class="font-display font-bold text-lg text-slate-300 flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-nexa-cyan"></i> Incoming Cyber Premieres
+                        </h3>
+                        <span class="text-xs text-slate-500 font-mono">STATUS: RENDERING</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="glass-card rounded-2xl p-4 flex flex-col justify-between h-64 border border-slate-800/80 relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-nexa-purple/40 text-nexa-cyan border border-nexa-cyan/30 uppercase">COMING Q4</span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i> TBA</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="h-4 w-3/4 bg-slate-800 rounded animate-pulse"></div>
+                                <div class="h-3 w-1/2 bg-slate-800/60 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-4 flex flex-col justify-between h-64 border border-slate-800/80 relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-nexa-cyan/20 text-nexa-cyan border border-nexa-cyan/30 uppercase">SCI-FI EPIC</span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i> TBA</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="h-4 w-3/4 bg-slate-800 rounded animate-pulse"></div>
+                                <div class="h-3 w-1/2 bg-slate-800/60 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-4 flex flex-col justify-between h-64 border border-slate-800/80 relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-nexa-magenta/30 text-nexa-magenta border border-nexa-magenta/30 uppercase">NEO NOIR</span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i> TBA</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="h-4 w-3/4 bg-slate-800 rounded animate-pulse"></div>
+                                <div class="h-3 w-1/2 bg-slate-800/60 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-4 flex flex-col justify-between h-64 border border-slate-800/80 relative overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <span class="px-2.5 py-1 rounded-md text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase">ANIME</span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i> TBA</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="h-4 w-3/4 bg-slate-800 rounded animate-pulse"></div>
+                                <div class="h-3 w-1/2 bg-slate-800/60 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- POPULATED CATALOG CONTAINER -->
+            <div id="populated-catalog-state" class="hidden space-y-10">
+                <!-- Dynamic Hero Feature Showcase -->
+                <div id="hero-feature-container" class="relative rounded-3xl overflow-hidden glass-panel border border-slate-700/80 shadow-2xl min-h-[380px] md:min-h-[460px] flex items-end p-6 md:p-12">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Catalog Grid -->
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <h2 class="font-display font-bold text-2xl text-white tracking-tight flex items-center gap-2">
+                            <i data-lucide="flame" class="w-6 h-6 text-nexa-cyan"></i> Trending Nexa Premieres
+                        </h2>
+                        <div class="flex items-center gap-2 text-xs text-slate-400">
+                            <span>Filter Genre:</span>
+                            <select id="genre-filter" onchange="renderShows()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-white focus:outline-none focus:border-nexa-cyan">
+                                <option value="All">All Genres</option>
+                                <option value="Sci-Fi">Sci-Fi</option>
+                                <option value="Action">Action</option>
+                                <option value="Cyberpunk">Cyberpunk</option>
+                                <option value="Thriller">Thriller</option>
+                                <option value="Drama">Drama</option>
+                                <option value="Fantasy">Fantasy</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="shows-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <!-- Dynamic Cards -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- STUDIO MANAGEMENT (ADMIN VIEW) -->
+        <main id="admin-view" class="hidden flex-grow max-w-7xl w-full mx-auto px-4 lg:px-8 py-8 space-y-8">
+            
+            <!-- Dashboard Title Banner -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+                <div>
+                    <div class="flex items-center gap-2 text-nexa-cyan text-xs font-mono uppercase tracking-wider">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i> Company Executive Portal
+                    </div>
+                    <h1 class="font-display font-extrabold text-3xl text-white">NexaFlix Content Management Studio</h1>
+                    <p class="text-slate-400 text-sm mt-1">Upload trailers, title thumbnails, manage catalog metadata and ratings.</p>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <button onclick="loadSampleData()" class="px-4 py-2.5 rounded-xl text-xs font-semibold glass-card text-nexa-cyan border border-nexa-cyan/30 hover:bg-nexa-cyan/10 flex items-center gap-2">
+                        <i data-lucide="database" class="w-4 h-4"></i> Populate Demo Shows
+                    </button>
+                    <button onclick="switchView('user')" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-nexa-cyan text-slate-950 hover:bg-white transition flex items-center gap-2 shadow-lg shadow-nexa-cyan/20">
+                        <i data-lucide="external-link" class="w-4 h-4"></i> View Live Platform
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Upload/Edit Form -->
+                <div class="lg:col-span-5">
+                    <div class="glass-panel rounded-2xl p-6 border border-slate-800 relative">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="font-display font-bold text-lg text-white flex items-center gap-2">
+                                <i data-lucide="plus-circle" class="w-5 h-5 text-nexa-cyan"></i> Upload New Show
+                            </h2>
+                            <span class="text-[10px] font-mono text-slate-400 uppercase bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800">Liquid Stream Ready</span>
+                        </div>
+
+                        <form id="show-form" onsubmit="handleShowSubmit(event)" class="space-y-4">
+                            <input type="hidden" id="show-id">
+                            
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Show Title *</label>
+                                <input type="text" id="show-title" required placeholder="e.g. Cyberpunk: Neon Odyssey" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-nexa-cyan transition">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Genre *</label>
+                                    <select id="show-genre" required class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-nexa-cyan">
+                                        <option value="Sci-Fi">Sci-Fi</option>
+                                        <option value="Cyberpunk">Cyberpunk</option>
+                                        <option value="Action">Action</option>
+                                        <option value="Thriller">Thriller</option>
+                                        <option value="Drama">Drama</option>
+                                        <option value="Fantasy">Fantasy</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Rating (1.0 - 5.0) *</label>
+                                    <input type="number" id="show-rating" min="1" max="5" step="0.1" value="4.8" required class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-nexa-cyan">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Thumbnail Image URL *</label>
+                                <input type="url" id="show-thumbnail" required placeholder="https://images.unsplash.com/photo-..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-nexa-cyan transition">
+                                <p class="text-[10px] text-slate-500 mt-1">Direct HTTPS image URL recommended.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Trailer Video URL (MP4 Stream) *</label>
+                                <input type="url" id="show-trailer" required placeholder="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-nexa-cyan transition">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Release Year</label>
+                                    <input type="text" id="show-year" value="2026" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-nexa-cyan">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Seasons / Format</label>
+                                    <input type="text" id="show-seasons" placeholder="e.g. 2 Seasons" value="1 Season" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-nexa-cyan">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Synopsis / Storyline</label>
+                                <textarea id="show-description" rows="3" placeholder="Enter brief overview of the show..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-nexa-cyan transition"></textarea>
+                            </div>
+
+                            <div class="pt-2 flex gap-3">
+                                <button type="submit" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-nexa-cyan to-nexa-purple font-bold text-slate-950 hover:text-white transition shadow-lg shadow-nexa-cyan/20">
+                                    Publish Show to Catalog
+                                </button>
+                                <button type="button" onclick="resetForm()" class="py-3 px-4 rounded-xl glass-card text-slate-400 hover:text-white text-xs font-semibold">
+                                    Clear
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Admin Inventory Table -->
+                <div class="lg:col-span-7">
+                    <div class="glass-panel rounded-2xl p-6 border border-slate-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="font-display font-bold text-lg text-white flex items-center gap-2">
+                                <i data-lucide="layers" class="w-5 h-5 text-nexa-purple"></i> Active Show Inventory
+                            </h2>
+                            <span id="inventory-count" class="text-xs font-mono text-nexa-cyan bg-nexa-cyan/10 px-3 py-1 rounded-full border border-nexa-cyan/20">0 Shows Live</span>
+                        </div>
+
+                        <!-- Inventory Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-300">
+                                <thead class="bg-slate-900/90 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                                    <tr>
+                                        <th class="py-3 px-3">Show</th>
+                                        <th class="py-3 px-3">Genre</th>
+                                        <th class="py-3 px-3">Rating</th>
+                                        <th class="py-3 px-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-shows-table-body" class="divide-y divide-slate-800/60">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                            <div id="table-empty-notice" class="py-12 text-center text-slate-500 text-xs">
+                                No shows uploaded yet. Fill out the form or click "Populate Demo Shows".
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="mt-auto glass-panel border-t border-slate-800/80 py-6 px-4 lg:px-8">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+                <div class="flex items-center gap-2">
+                    <span class="font-display font-bold text-white tracking-wider">NEXA<span class="text-nexa-cyan">FLIX</span></span>
+                    <span>&copy; 2026 NexaFlix Platform Inc. All rights reserved.</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="hover:text-nexa-cyan transition">Privacy Policy</a>
+                    <a href="#" class="hover:text-nexa-cyan transition">Terms of Service</a>
+                    <a href="#" class="hover:text-nexa-cyan transition">Support</a>
+                    <button onclick="switchView('admin')" class="text-nexa-cyan hover:underline">Studio Portal</button>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- AUTHENTICATION MODAL -->
+    <div id="auth-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="relative w-full max-w-md glass-panel rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl animate-float">
+            <!-- Close Button -->
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full bg-slate-900/60 hover:bg-slate-800 transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <div class="inline-flex p-3 rounded-2xl bg-slate-900 border border-nexa-cyan/30 text-nexa-cyan mb-3">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                </div>
+                <h3 id="auth-modal-title" class="font-display font-bold text-2xl text-white">Sign In to NexaFlix</h3>
+                <p id="auth-modal-subtitle" class="text-xs text-slate-400 mt-1">Access liquid streaming experience across all devices.</p>
+            </div>
+
+            <!-- SSO Google Button -->
+            <button onclick="handleGoogleAuth()" class="w-full py-3 px-4 rounded-xl glass-card hover:bg-slate-800 border border-slate-700 flex items-center justify-center gap-3 text-sm font-semibold text-slate-200 hover:text-white transition mb-5">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                Continue with Google
+            </button>
+
+            <div class="relative flex py-2 items-center mb-5">
+                <div class="flex-grow border-t border-slate-800"></div>
+                <span class="flex-shrink mx-4 text-[10px] text-slate-500 uppercase tracking-widest font-mono">Or NexaFlix Account</span>
+                <div class="flex-grow border-t border-slate-800"></div>
+            </div>
+
+            <!-- NexaFlix Auth Form -->
+            <form onsubmit="handleNexaAuth(event)" class="space-y-4">
+                <div id="name-field-container" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+                    <input type="text" id="auth-name" placeholder="John Doe" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-nexa-cyan">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+                    <input type="email" id="auth-email" required placeholder="user@nexaflix.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-nexa-cyan">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-nexa-cyan">
+                </div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-nexa-cyan to-indigo-600 font-bold text-slate-950 hover:text-white shadow-lg shadow-nexa-cyan/20 transition">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-5 text-center text-xs text-slate-400">
+                <span id="auth-switch-text">Don't have a NexaFlix Account?</span>
+                <button onclick="toggleAuthMode()" id="auth-switch-btn" class="text-nexa-cyan font-semibold ml-1 hover:underline">
+                    Create Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRAILER VIDEO PLAYER MODAL -->
+    <div id="trailer-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl">
+        <div class="relative w-full max-w-4xl glass-panel rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+            <div class="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/80">
+                <div class="flex items-center gap-3">
+                    <span id="trailer-genre-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-nexa-cyan/20 text-nexa-cyan">SCI-FI</span>
+                    <h3 id="trailer-title" class="font-display font-bold text-lg text-white">Trailer Preview</h3>
+                </div>
+                <button onclick="closeTrailerModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-slate-800 hover:bg-slate-700">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="relative bg-black aspect-video w-full flex items-center justify-center">
+                <video id="trailer-video-player" class="w-full h-full object-cover" controls autoplay>
+                    <source src="" type="video/mp4">
+                    Your browser does not support HTML video.
+                </video>
+            </div>
+
+            <div class="p-4 bg-slate-900/60 flex items-center justify-between">
+                <p id="trailer-desc" class="text-xs text-slate-400 max-w-xl">Show summary here...</p>
+                <div class="flex items-center gap-2 text-xs text-amber-400">
+                    <i data-lucide="star" class="w-4 h-4 fill-amber-400"></i>
+                    <span id="trailer-rating" class="font-bold text-white">4.8</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm glass-panel border border-nexa-cyan/40 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3">
+        <div class="p-2 rounded-xl bg-nexa-cyan/20 text-nexa-cyan">
+            <i data-lucide="info" class="w-5 h-5"></i>
+        </div>
+        <div>
+            <h4 id="toast-title" class="text-xs font-bold text-white">Notification</h4>
+            <p id="toast-message" class="text-[11px] text-slate-300">Action performed successfully.</p>
+        </div>
+    </div>
+
+    <!-- APP SCRIPT -->
+    <script>
+        let currentView = 'user';
+        let currentUser = null;
+        let authMode = 'login';
+        let shows = [];
+
+        const sampleData = [
+            {
+                id: '1',
+                title: 'Neon Zenith: 2099',
+                genre: 'Cyberpunk',
+                rating: 4.9,
+                thumbnail: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1000&q=80',
+                trailer: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                year: '2026',
+                seasons: '2 Seasons',
+                description: 'In a rain-drenched megacity controlled by AI syndicates, a rogue netrunner uncovers a liquid neural code capable of rewriting human consciousness.'
+            },
+            {
+                id: '2',
+                title: 'Quantum Drift',
+                genre: 'Sci-Fi',
+                rating: 4.7,
+                thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80',
+                trailer: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+                year: '2025',
+                seasons: '1 Season',
+                description: 'When dark matter engines rupture in deep space, a stranded research crew must navigate multiversal realities to find their way home.'
+            },
+            {
+                id: '3',
+                title: 'Solaris Protocol',
+                genre: 'Thriller',
+                rating: 4.8,
+                thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80',
+                trailer: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+                year: '2026',
+                seasons: '3 Seasons',
+                description: 'Political intrigue and planetary sabotage erupt on humanity’s first orbital colony hovering over Jupiter’s liquid hydrogen seas.'
+            }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            const savedShows = localStorage.getItem('nexa_shows');
+            if (savedShows) {
+                try { shows = JSON.parse(savedShows); } catch (e) { shows = []; }
+            }
+
+            const savedUser = localStorage.getItem('nexa_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+            }
+
+            renderAuthHeader();
+            renderCatalogState();
+            renderAdminTable();
+        });
+
+        function switchView(targetView) {
+            currentView = targetView;
+            const userViewEl = document.getElementById('user-view');
+            const adminViewEl = document.getElementById('admin-view');
+            const navUserBtn = document.getElementById('nav-user-btn');
+            const navAdminBtn = document.getElementById('nav-admin-btn');
+
+            if (targetView === 'user') {
+                userViewEl.classList.remove('hidden');
+                adminViewEl.classList.add('hidden');
+                navUserBtn.className = "px-5 py-2 rounded-full transition-all text-slate-950 bg-nexa-cyan shadow-md shadow-nexa-cyan/30 flex items-center gap-2";
+                navAdminBtn.className = "px-5 py-2 rounded-full transition-all text-slate-400 hover:text-white flex items-center gap-2";
+            } else {
+                userViewEl.classList.add('hidden');
+                adminViewEl.classList.remove('hidden');
+                navAdminBtn.className = "px-5 py-2 rounded-full transition-all text-slate-950 bg-nexa-cyan shadow-md shadow-nexa-cyan/30 flex items-center gap-2";
+                navUserBtn.className = "px-5 py-2 rounded-full transition-all text-slate-400 hover:text-white flex items-center gap-2";
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function renderAuthHeader() {
+            const container = document.getElementById('auth-status-container');
+            if (currentUser) {
+                container.innerHTML = `
+                    <div class="flex items-center gap-2 pl-3 pr-2 py-1 rounded-full glass-card border border-nexa-cyan/30">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-xs font-medium text-slate-200">${currentUser.name}</span>
+                        <button onclick="handleLogout()" title="Log Out" class="p-1 hover:text-rose-400 text-slate-400 transition ml-1">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="openAuthModal('login')" class="px-4 py-2 rounded-xl text-xs font-semibold glass-card text-white hover:bg-slate-800 border border-slate-700 transition flex items-center gap-1.5">
+                        <i data-lucide="user" class="w-3.5 h-3.5 text-nexa-cyan"></i> Sign In / Register
+                    </button>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function openAuthModal(mode = 'login') {
+            authMode = mode;
+            updateAuthModalUI();
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            authMode = authMode === 'login' ? 'signup' : 'login';
+            updateAuthModalUI();
+        }
+
+        function updateAuthModalUI() {
+            const title = document.getElementById('auth-modal-title');
+            const subtitle = document.getElementById('auth-modal-subtitle');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const switchText = document.getElementById('auth-switch-text');
+            const switchBtn = document.getElementById('auth-switch-btn');
+            const nameContainer = document.getElementById('name-field-container');
+
+            if (authMode === 'login') {
+                title.innerText = 'Sign In to NexaFlix';
+                subtitle.innerText = 'Access liquid streaming experience across all devices.';
+                submitBtn.innerText = 'Sign In to NexaFlix';
+                switchText.innerText = "Don't have a NexaFlix Account?";
+                switchBtn.innerText = 'Create Account';
+                nameContainer.classList.add('hidden');
+            } else {
+                title.innerText = 'Create NexaFlix Account';
+                subtitle.innerText = 'Join the next generation liquid cinema ecosystem.';
+                submitBtn.innerText = 'Create Account';
+                switchText.innerText = 'Already have an account?';
+                switchBtn.innerText = 'Sign In';
+                nameContainer.classList.remove('hidden');
+            }
+        }
+
+        function handleGoogleAuth() {
+            currentUser = { name: 'Google Streamer', email: 'user@gmail.com', provider: 'Google' };
+            localStorage.setItem('nexa_user', JSON.stringify(currentUser));
+            renderAuthHeader();
+            closeAuthModal();
+            showToast('Authenticated', 'Signed in via Google account successfully.');
+        }
+
+        function handleNexaAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const nameInput = document.getElementById('auth-name').value;
+            const name = authMode === 'signup' && nameInput ? nameInput : email.split('@')[0];
+
+            currentUser = { name, email, provider: 'NexaFlix' };
+            localStorage.setItem('nexa_user', JSON.stringify(currentUser));
+            renderAuthHeader();
+            closeAuthModal();
+            showToast('Welcome!', `Logged into NexaFlix as ${name}`);
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('nexa_user');
+            renderAuthHeader();
+            showToast('Logged Out', 'You have been signed out.');
+        }
+
+        function handleShowSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('show-id').value || Date.now().toString();
+            const title = document.getElementById('show-title').value;
+            const genre = document.getElementById('show-genre').value;
+            const rating = parseFloat(document.getElementById('show-rating').value) || 4.5;
+            const thumbnail = document.getElementById('show-thumbnail').value;
+            const trailer = document.getElementById('show-trailer').value;
+            const year = document.getElementById('show-year').value || '2026';
+            const seasons = document.getElementById('show-seasons').value || '1 Season';
+            const description = document.getElementById('show-description').value || 'A sleek new futuristic streaming release on NexaFlix.';
+
+            const newShow = { id, title, genre, rating, thumbnail, trailer, year, seasons, description };
+            const existingIndex = shows.findIndex(s => s.id === id);
+
+            if (existingIndex > -1) {
+                shows[existingIndex] = newShow;
+                showToast('Show Updated', `Updated "${title}" in the catalog.`);
+            } else {
+                shows.unshift(newShow);
+                showToast('Show Published', `"${title}" is now live on NexaFlix!`);
+            }
+
+            saveShows();
+            resetForm();
+            renderCatalogState();
+            renderAdminTable();
+        }
+
+        function editShow(id) {
+            const show = shows.find(s => s.id === id);
+            if (!show) return;
+
+            document.getElementById('show-id').value = show.id;
+            document.getElementById('show-title').value = show.title;
+            document.getElementById('show-genre').value = show.genre;
+            document.getElementById('show-rating').value = show.rating;
+            document.getElementById('show-thumbnail').value = show.thumbnail;
+            document.getElementById('show-trailer').value = show.trailer;
+            document.getElementById('show-year').value = show.year;
+            document.getElementById('show-seasons').value = show.seasons;
+            document.getElementById('show-description').value = show.description;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteShow(id) {
+            const show = shows.find(s => s.id === id);
+            shows = shows.filter(s => s.id !== id);
+            saveShows();
+            renderCatalogState();
+            renderAdminTable();
+            showToast('Removed', `Deleted "${show ? show.title : 'Show'}" from catalog.`);
+        }
+
+        function loadSampleData() {
+            shows = [...sampleData];
+            saveShows();
+            renderCatalogState();
+            renderAdminTable();
+            showToast('Demo Data Loaded', 'Populated catalog with futuristic sample shows.');
+        }
+
+        function saveShows() {
+            localStorage.setItem('nexa_shows', JSON.stringify(shows));
+        }
+
+        function resetForm() {
+            document.getElementById('show-form').reset();
+            document.getElementById('show-id').value = '';
+        }
+
+        function renderCatalogState() {
+            const emptyState = document.getElementById('empty-catalog-state');
+            const populatedState = document.getElementById('populated-catalog-state');
+            document.getElementById('badge-count').innerText = shows.length;
+
+            if (shows.length === 0) {
+                emptyState.classList.remove('hidden');
+                populatedState.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                populatedState.classList.remove('hidden');
+                renderHeroFeature();
+                renderShows();
+            }
+        }
+
+        function renderHeroFeature() {
+            if (shows.length === 0) return;
+            const hero = shows[0];
+            const heroContainer = document.getElementById('hero-feature-container');
+
+            heroContainer.innerHTML = `
+                <div class="absolute inset-0 z-0">
+                    <img src="${hero.thumbnail}" class="w-full h-full object-cover filter brightness-75 scale-105" onerror="this.src='https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1000&q=80'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#050711] via-[#050711]/60 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#050711] via-[#050711]/70 to-transparent"></div>
+                </div>
+
+                <div class="relative z-10 max-w-2xl space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-nexa-cyan text-slate-950 uppercase tracking-wider">#1 Premiere Spotlight</span>
+                        <span class="text-xs text-slate-300 font-mono">${hero.year} • ${hero.seasons}</span>
+                    </div>
+
+                    <h1 class="text-3xl md:text-5xl font-display font-extrabold text-white tracking-tight leading-none">${hero.title}</h1>
+                    <p class="text-slate-300 text-sm line-clamp-3 leading-relaxed">${hero.description}</p>
+
+                    <div class="flex items-center gap-4 pt-2">
+                        <button onclick="playTrailer('${hero.id}')" class="px-6 py-3 rounded-xl bg-nexa-cyan font-bold text-slate-950 hover:bg-white transition flex items-center gap-2 shadow-lg shadow-nexa-cyan/30">
+                            <i data-lucide="play" class="w-5 h-5 fill-slate-950"></i> Watch Trailer
+                        </button>
+                        <button onclick="showToast('Watchlist', 'Added ${hero.title} to your fluid list.')" class="px-6 py-3 rounded-xl glass-card text-white hover:bg-slate-800 border border-slate-700 flex items-center gap-2">
+                            <i data-lucide="plus" class="w-5 h-5"></i> Add to Watchlist
+                        </button>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function renderShows() {
+            const grid = document.getElementById('shows-grid');
+            const genreFilter = document.getElementById('genre-filter').value;
+
+            const filteredShows = genreFilter === 'All' 
+                ? shows 
+                : shows.filter(s => s.genre === genreFilter);
+
+            grid.innerHTML = filteredShows.map(show => `
+                <div class="glass-card rounded-2xl overflow-hidden flex flex-col justify-between group border border-slate-800/80">
+                    <div class="relative aspect-video overflow-hidden">
+                        <img src="${show.thumbnail}" alt="${show.title}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80"></div>
+                        
+                        <div class="absolute top-3 left-3">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-nexa-cyan border border-nexa-cyan/30 uppercase">${show.genre}</span>
+                        </div>
+
+                        <div class="absolute top-3 right-3 flex items-center gap-1 bg-slate-900/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-xs font-bold text-amber-400">
+                            <i data-lucide="star" class="w-3 h-3 fill-amber-400"></i> ${show.rating}
+                        </div>
+
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-slate-950/40">
+                            <button onclick="playTrailer('${show.id}')" class="w-12 h-12 rounded-full bg-nexa-cyan text-slate-950 flex items-center justify-center shadow-lg shadow-nexa-cyan/50 transform group-hover:scale-110 transition">
+                                <i data-lucide="play" class="w-6 h-6 fill-slate-950 ml-0.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-4 space-y-2">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                            <span>${show.year}</span>
+                            <span>${show.seasons}</span>
+                        </div>
+                        <h3 class="font-display font-bold text-base text-white group-hover:text-nexa-cyan transition line-clamp-1">${show.title}</h3>
+                        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">${show.description}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function renderAdminTable() {
+            const body = document.getElementById('admin-shows-table-body');
+            const emptyNotice = document.getElementById('table-empty-notice');
+            document.getElementById('inventory-count').innerText = `${shows.length} Show${shows.length === 1 ? '' : 's'} Live`;
+
+            if (shows.length === 0) {
+                body.innerHTML = '';
+                emptyNotice.classList.remove('hidden');
+                return;
+            }
+
+            emptyNotice.classList.add('hidden');
+            body.innerHTML = shows.map(show => `
+                <tr class="hover:bg-slate-900/40 transition">
+                    <td class="py-3 px-3">
+                        <div class="flex items-center gap-3">
+                            <img src="${show.thumbnail}" class="w-12 h-12 rounded-lg object-cover border border-slate-700" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=100&q=80'">
+                            <div>
+                                <h4 class="font-bold text-white text-sm">${show.title}</h4>
+                                <span class="text-[10px] text-slate-400 font-mono">${show.year} • ${show.seasons}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-3">
+                        <span class="px-2 py-0.5 rounded text-xs bg-slate-800 text-nexa-cyan font-semibold">${show.genre}</span>
+                    </td>
+                    <td class="py-3 px-3 font-semibold text-amber-400 text-xs">
+                        ★ ${show.rating}
+                    </td>
+                    <td class="py-3 px-3 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="editShow('${show.id}')" title="Edit" class="p-1.5 rounded-lg glass-card text-slate-300 hover:text-nexa-cyan">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteShow('${show.id}')" title="Delete" class="p-1.5 rounded-lg glass-card text-slate-300 hover:text-rose-400">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function playTrailer(id) {
+            const show = shows.find(s => s.id === id);
+            if (!show) return;
+
+            document.getElementById('trailer-title').innerText = show.title;
+            document.getElementById('trailer-desc').innerText = show.description;
+            document.getElementById('trailer-genre-badge').innerText = show.genre;
+            document.getElementById('trailer-rating').innerText = show.rating;
+
+            const player = document.getElementById('trailer-video-player');
+            player.src = show.trailer;
+
+            document.getElementById('trailer-modal').classList.remove('hidden');
+        }
+
+        function closeTrailerModal() {
+            const player = document.getElementById('trailer-video-player');
+            player.pause();
+            player.src = '';
+            document.getElementById('trailer-modal').classList.add('hidden');
+        }
+
+        function showToast(title, message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-message').innerText = message;
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
